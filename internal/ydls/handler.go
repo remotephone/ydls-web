@@ -74,44 +74,48 @@ const htmlForm = `
 <head>
     <title>Video Converter</title>
     <style>
-        body {
-            background-color: #222;
-            color: #fff;
-            font-family: Arial, sans-serif;
-        }
-        h1 {
-            text-align: center;
-            margin-top: 50px;
-        }
-        form {
-            margin: 0 auto;
-            max-width: 500px;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: #333;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            margin-bottom: 20px;
-        }
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #3e8e41;
-        }
+	body {
+		background-color: #222;
+		color: #fff;
+		font-family: Arial, sans-serif;
+	}
+	h1 {
+		text-align: center;
+		margin-top: 50px;
+	}
+	form {
+		margin: 0 auto;
+		max-width: 500px;
+		padding: 20px;
+		border-radius: 10px;
+		background-color: #333;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	label {
+		display: block;
+		margin-bottom: 10px;
+		text-align: center;
+	}
+	input[type="text"] {
+		width: 100%;
+		padding: 10px;
+		border-radius: 5px;
+		border: none;
+		margin-bottom: 20px;
+	}
+	input[type="submit"] {
+		background-color: #4CAF50;
+		color: #fff;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+	input[type="submit"]:hover {
+		background-color: #3e8e41;
+	}
     </style>
 </head>
 <body>
