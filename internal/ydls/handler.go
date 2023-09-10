@@ -169,7 +169,8 @@ func (yh *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'unsafe-inline'; form-action 'self'")
 			yh.IndexTmpl.Execute(w, yh.YDLS.Config.Formats)
 		} else {
-			http.Error(w, "Not found", http.StatusNotFound)
+			http.Redirect(w, r, "/convert", http.StatusSeeOther)
+			return
 		}
 		return
 	} else if r.URL.Path == "/favicon.ico" {
