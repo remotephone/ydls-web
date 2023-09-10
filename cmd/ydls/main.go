@@ -36,64 +36,6 @@ func fatalIfErrorf(err error, format string, a ...interface{}) {
 	}
 }
 
-// Define an HTML form template
-const htmlForm = `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Video Converter</title>
-    <style>
-        body {
-            background-color: #222;
-            color: #fff;
-            font-family: Arial, sans-serif;
-        }
-        h1 {
-            text-align: center;
-            margin-top: 50px;
-        }
-        form {
-            margin: 0 auto;
-            max-width: 500px;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: #333;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            margin-bottom: 20px;
-        }
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #3e8e41;
-        }
-    </style>
-</head>
-<body>
-    <h1>Video Converter</h1>
-    <form action="/convert" method="post">
-        <label for="url">Video URL:</label>
-        <input type="text" id="url" name="url" required>
-        <input type="submit" value="Convert">
-    </form>
-</body>
-</html>
-`
-
 func init() {
 	log.SetFlags(0)
 	flag.Usage = func() {
@@ -108,60 +50,6 @@ func init() {
 	}
 	if os.Getenv("DEBUG") != "" {
 		*debugFlag = true
-	}
-}
-
-func convertHandler(w http.ResponseWriter, r *http.Request, y ydls.YDLS) {
-	if r.Method == http.MethodGet {
-		// Render the HTML form
-		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprint(w, htmlForm)
-		return
-	}
-
-	if r.Method == http.MethodPost {
-		// Retrieve the video URL from the form data
-		err := r.ParseForm()
-		if err != nil {
-			http.Error(w, "Error parsing form data", http.StatusInternalServerError)
-			return
-		}
-		rawURL := r.FormValue("url")
-
-		if rawURL == "" {
-			http.Error(w, "Video URL is required", http.StatusBadRequest)
-			return
-		}
-
-		requestOptions, requestOptionsErr := ydls.NewRequestOptionsFromOpts([]string{}, y.Config.Formats)
-		requestOptions.MediaRawURL = rawURL
-		fatalIfErrorf(requestOptionsErr, "format and options")
-
-		ctx, cancelFn := context.WithCancel(context.Background())
-		defer cancelFn()
-
-		dr, err := y.Download(ctx, ydls.DownloadOptions{
-			RequestOptions: requestOptions,
-		})
-		fatalIfErrorf(err, "download failed")
-		defer dr.Media.Close()
-		defer dr.Wait()
-
-		// Set the response header to indicate video download
-		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", dr.Filename))
-		w.Header().Set("Content-Type", "application/octet-stream")
-
-		// Copy the video data to the response writer
-		_, err = io.Copy(w, dr.Media)
-		if err != nil {
-			http.Error(w, "Error copying video data to response", http.StatusInternalServerError)
-			return
-		}
-
-		// Close the response writer
-		dr.Media.Close()
-		dr.Wait()
-		return
 	}
 }
 
@@ -184,26 +72,11 @@ func server(y ydls.YDLS) {
 		yh.IndexTmpl = indexTmpl
 	}
 
-	http.HandleFunc("/convert", func(w http.ResponseWriter, r *http.Request) {
-		convertHandler(w, r, y)
-	})
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		// Render the HTML form
-		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprint(w, htmlForm)
-	})
-
 	log.Printf("Listening on %s", *listenFlag)
-	if err := http.ListenAndServe(*listenFlag, nil); err != nil {
+	if err := http.ListenAndServe(*listenFlag, yh); err != nil {
 		log.Fatal(err)
 	}
 }
-
 
 type progressWriter struct {
 	fn    func(bytes uint64)
@@ -227,8 +100,6 @@ func absRootPath(root string, path string) (string, error) {
 
 	return abs, nil
 }
-
-
 
 func download(y ydls.YDLS) {
 	var debugLog ydls.Printer
@@ -297,3 +168,4 @@ func main() {
 		download(y)
 	}
 }
+

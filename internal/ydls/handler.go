@@ -68,6 +68,71 @@ type Handler struct {
 	DebugLog  Printer
 }
 
+const htmlForm = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Converter</title>
+    <style>
+        body {
+            background-color: #222;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+        }
+        form {
+            margin: 0 auto;
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 20px;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #3e8e41;
+        }
+    </style>
+</head>
+<body>
+    <h1>Video Converter</h1>
+    <form action="/" method="get">
+        <label for="url">Video URL:</label>
+        <input type="text" id="url" name="url" required>
+        <input type="submit" value="Convert">
+    </form>
+</body>
+</html>
+`
+
+// Add a handler for /convert that serves the HTML form
+func (yh *Handler) AddFormHandler() {
+	http.HandleFunc("/convert", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		fmt.Fprint(w, htmlForm)
+	})
+}
+
 func (yh *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	infoLog := yh.InfoLog
 	if infoLog == nil {
@@ -88,7 +153,14 @@ func (yh *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.URL.Path == "/" && r.URL.RawQuery == "" {
+	if r.URL.Path == "/convert" {
+		// Serve convert form and take input to convert
+		if r.Method == http.MethodGet {
+			w.Header().Set("Content-Type", "text/html")
+			fmt.Fprint(w, htmlForm)
+		}
+		return
+	} else if r.URL.Path == "/" && r.URL.RawQuery == "" {
 		if yh.IndexTmpl != nil {
 			w.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'unsafe-inline'; form-action 'self'")
 			yh.IndexTmpl.Execute(w, yh.YDLS.Config.Formats)
