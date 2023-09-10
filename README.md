@@ -152,3 +152,7 @@ format picker so formats can be shared and not re-downloaded.
 ## License
 
 ydls is licensed under the MIT license. See [LICENSE](LICENSE) for the full license text.
+
+# This fork
+
+This was forked so I could create a copy of the repo with a web form functionality that maybe no one else would use.
