@@ -120,10 +120,16 @@ const htmlForm = `
 </head>
 <body>
     <h1>Video Converter</h1>
-    <form action="/mp4/" method="get">
+    <form action="/" method="get">
         <label for="url">Video URL:</label>
         <input type="text" id="url" name="url" required>
-        <input type="submit" value="Convert">
+        <label for="format">Select Format:</label>
+        <select id="format" name="format">
+            <option value="mp4">MP4</option>
+            <option value="mkv">MKV</option>
+            <option value="avi">AVI</option>
+        </select>
+	<input type="submit" value="Convert">
     </form>
 </body>
 </html>
